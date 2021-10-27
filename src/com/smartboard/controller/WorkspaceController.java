@@ -2,6 +2,7 @@ package com.smartboard.controller;
 
 import com.smartboard.model.database.DatabaseHandlerSingleton;
 import com.smartboard.model.database.dao.ProjectDataAccessObject;
+import com.smartboard.model.user.Profile;
 import com.smartboard.model.workspace.Project;
 import com.smartboard.view.FactoryAlertViewCreator;
 import com.smartboard.view.FactoryInputDialogueCreator;
@@ -29,9 +30,21 @@ public class WorkspaceController implements Initializable {
     @FXML public TabPane tabPane;
     @FXML public MenuItem projectMenuItem;
     @FXML public MenuItem deleteMenuItem;
+    @FXML public Label username;
+
+    //model
+    public Profile profile;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
+    }
+
+    public void initData(Profile profile) {
+
+        setUsername(new Label(profile.getUsername()));
+
+        setProfile(profile);
 
     }
 

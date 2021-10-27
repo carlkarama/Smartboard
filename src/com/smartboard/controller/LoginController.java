@@ -6,8 +6,14 @@ import com.smartboard.model.user.Profile;
 import com.smartboard.view.FactorySceneViewCreator;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.util.ResourceBundle;
@@ -40,21 +46,36 @@ public class LoginController implements Initializable {
         }
     }
 
-    public void userLogin(ActionEvent actionEvent) {
+    public void userLogin(ActionEvent actionEvent) throws IOException {
 
         if (actionEvent.getSource().equals(loginBtn)) {
 
             Connection connection = DatabaseHandlerSingleton.getDatabaseHandlerSingleton();
 
-            Profile loginDetails = new Profile(username.getText(), password.getText());
+            profile = new Profile(username.getText(), password.getText());
 
             ProfileDataAccessObject profileDataAccessObject = new ProfileDataAccessObject(connection);
 
-            if (profileDataAccessObject.login(loginDetails) == null) {
+            if (profileDataAccessObject.login(profile) == null) {
                 System.out.println("Login failed");
+
             } else {
-                System.out.println("Logged In");
-                FactorySceneViewCreator.changeScene(actionEvent, "workspace");
+                //change scene to workspace
+                //showCustomerDialog(profile);
+
+                URL fxmlLocation = getClass().getResource("/com/smartboard/view/Workspace.fxml");
+                FXMLLoader loader = new FXMLLoader(fxmlLocation);
+
+                Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+                stage.setScene(new Scene(loader.load()));
+
+                WorkspaceController controller = loader.getController();
+
+                controller.initData(profile);
+
+                stage.show();
+
+                //FactorySceneViewCreator.changeScene(actionEvent, "workspace");
             }
         }
     }

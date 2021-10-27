@@ -10,8 +10,10 @@ public class ProjectDataAccessObject extends DataAccessObject<Project> {
 
     private static final String INSERT_PROJECT = "INSERT INTO project(project) VALUES (?)";
     private static final String DELETE_PROJECT = "DELETE FROM project WHERE project = ?";
-    private static final String INSERT_USER_PROJECT = "INSERT INTO save(projectID, username) VALUES (?, ?)";
-    private static final String GET_ID = "SELECT projectID FROM project WHERE projectID = ?";
+    private static final String INSERT_USER_PROJECT = "INSERT INTO save(projectID, userID) VALUES (LAST_INSERT_ID(), ?)";
+    private static final String SELECT_PROJECT_ID = "SELECT projectID FROM project WHERE projectID = ?";
+    private static final String SELECT_PROJECTS = "SELECT project FROM project INNER JOIN save ON save.projectID = project.projectID WHERE userID = ?";
+    private static final String SELECT_USER_ID = "SELECT userID FROM user WHERE username = ?";
 
 
     public ProjectDataAccessObject(Connection connection) {
@@ -33,30 +35,29 @@ public class ProjectDataAccessObject extends DataAccessObject<Project> {
         return null;
     }
 
+    /**
+     * @implSpec This method creates new projects. dto instance variable is an abbreviation of DataTransferObject.<br>
+     * @implNote {@code create} overrides create(T dto) <br>
+     * {@code INSERT_PROJECT} is an SQL query that inserts a new rows to project table <br>
+     * {@code INSERT_USER_PROJECT} is an SQL query that inserts foreign keys to save table by referencing user and project tables <br>*/
     @Override
     public boolean create(Project dto) {
 
         // Initialise prepared statements in try catch block to automatically close open resources
         try(PreparedStatement projectPreparedStatement = connection.prepareStatement(INSERT_PROJECT, Statement.RETURN_GENERATED_KEYS);
-            PreparedStatement userPreparedStatement = connection.prepareStatement(INSERT_USER_PROJECT)) {
+            PreparedStatement savePreparedStatement = connection.prepareStatement(INSERT_USER_PROJECT, Statement.RETURN_GENERATED_KEYS)) {
 
             projectPreparedStatement.setString(1, dto.getProject());
             projectPreparedStatement.execute();
 
             if (projectPreparedStatement.getGeneratedKeys().next()) {
+
                 try {
-
-                    int projectID = getLastValue(dto.getProject());
-                    int userID = dto.getUser().getId();
-
-                    userPreparedStatement.setInt(1, projectID);
-                    userPreparedStatement.setInt(2, userID);
-
-                    return userPreparedStatement.execute();
-
-                } catch (SQLException e) {
-                    //e.printStackTrace();
-                    FactoryAlertViewCreator.getAlert("error:sqle");
+                    savePreparedStatement.setInt(1, dto.getProfile().getId());
+                    savePreparedStatement.executeUpdate();
+                    return true;
+                } catch (SQLIntegrityConstraintViolationException sqlException) {
+                    FactoryAlertViewCreator.getAlert("error:sqlicve");
                 }
             } else if (projectPreparedStatement.getGeneratedKeys().isBeforeFirst()) {
                 FactoryAlertViewCreator.getAlert("error:pae");
@@ -77,16 +78,37 @@ public class ProjectDataAccessObject extends DataAccessObject<Project> {
     @Override
     public int getLastValue(String sequence) {
 
-        try(PreparedStatement preparedStatement = this.connection.prepareStatement(GET_ID, Statement.RETURN_GENERATED_KEYS)) {
+        try(PreparedStatement preparedStatement = this.connection.prepareStatement(SELECT_PROJECT_ID, Statement.RETURN_GENERATED_KEYS)) {
+
             preparedStatement.setString(1, sequence);
             preparedStatement.execute();
 
             if (preparedStatement.getResultSet().next()) {
+
+                System.out.println("Get Last ID:  " + preparedStatement.getResultSet().getInt("projectID"));
+
                 return preparedStatement.getResultSet().getInt("projectID");
             }
         } catch (SQLException sqlException) {
             sqlException.printStackTrace();
         }
+        return 0;
+    }
+
+    public int getProjectID(String project) {
+        String PROJECT_ID = "SELECT projectID FROM project WHERE project = ?";
+
+        try(PreparedStatement preparedStatement = this.connection.prepareStatement(PROJECT_ID, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setString(1, project);
+            preparedStatement.execute();
+
+            if (preparedStatement.getGeneratedKeys().next()) {
+                return preparedStatement.getResultSet().getInt("projectID");
+            }
+        } catch (SQLException sqlException) {
+            sqlException.printStackTrace();
+        }
+
         return 0;
     }
 
