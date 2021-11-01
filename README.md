@@ -1,2 +1,2 @@
 # Smartboard
-A desktop app to organize tasks
+A desktop app to organize tasks. 50% complete
