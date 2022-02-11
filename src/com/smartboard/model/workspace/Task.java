@@ -1,6 +1,9 @@
 package com.smartboard.model.workspace;
 
 
+import com.smartboard.model.database.dto.DataTransferObject;
+
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -8,19 +11,31 @@ import java.util.Date;
  *  @see Column
  *  @version 1.0 */
 
-public class Task implements Taskable {
+public class Task implements Taskable, DataTransferObject {
+
+    //ID of task
+    private int taskID;
 
     // the name of the task
     private String task;
 
     // when the task begins
-    private Date startDate;
+    private LocalDate startDate;
 
     // when the task ends
-    private Date endDate;
+    private LocalDate endDate;
 
     // checks whether task is completed;
     private boolean isCompleted;
+
+    // a short summary of the task to be completed
+    private String description;
+
+    //a checklist to finish off items
+    private String checklist;
+
+    public Task() {}
+
 
     public Task(String task) {
         this.task = task;
@@ -31,11 +46,26 @@ public class Task implements Taskable {
         this.isCompleted = isCompleted;
     }
 
-    public Task(String task, Date startDate, Date endDate, boolean isCompleted) {
+    public Task(String task, LocalDate endDate, String description) {
         this.task = task;
-        this.startDate = startDate;
         this.endDate = endDate;
-        this.isCompleted = isCompleted;
+        this.description = description;
+    }
+
+    public int getTaskID() {
+        return taskID;
+    }
+
+    public void setTaskID(int taskID) {
+        this.taskID = taskID;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getTask() {
@@ -46,19 +76,19 @@ public class Task implements Taskable {
         this.task = task;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 
@@ -68,5 +98,10 @@ public class Task implements Taskable {
 
     public void setCompleted(boolean completed) {
         isCompleted = completed;
+    }
+
+    @Override
+    public void getID() {
+
     }
 }

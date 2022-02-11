@@ -17,6 +17,10 @@ public class Column implements AddTaskCard<Task>, EditTaskName<Task>, DeleteTask
 
     private List<Task> tasks = new ArrayList<>();
 
+    public Column(String column) {
+        this.column = column;
+    }
+
     public Column(String column, List<Task> tasks) {
         this.column = column;
         this.tasks = tasks;
@@ -50,10 +54,10 @@ public class Column implements AddTaskCard<Task>, EditTaskName<Task>, DeleteTask
 
     @Override
     public boolean editTaskName(Task task1, Task task2) {
-        
-       int nameToChange = this.tasks.indexOf(task1);
 
-       return this.tasks.set(nameToChange, task1) != null;
+        int nameToChange = this.tasks.indexOf(task1);
+
+        return this.tasks.set(nameToChange, task1) != null;
     }
 
     @Override

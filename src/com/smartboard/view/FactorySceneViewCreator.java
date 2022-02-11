@@ -1,8 +1,9 @@
 package com.smartboard.view;
 
-import com.smartboard.controller.LoginController;
-import com.smartboard.controller.SignupController;
-import com.smartboard.controller.WorkspaceController;
+import com.smartboard.controller.*;
+import com.smartboard.model.database.dto.DataTransferObject;
+import com.smartboard.model.user.Profile;
+import com.smartboard.model.workspace.Project;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -11,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Objects;
 
 /** @author Carl Karama
@@ -23,21 +25,17 @@ import java.util.Objects;
 
 public final class FactorySceneViewCreator {
 
-    private FactorySceneViewCreator(ActionEvent actionEvent, String pane) {
-        changeScene(actionEvent, pane);
-    }
 
     /**
      * @implSpec Make sure to insert scene abbreviation as string listed below. {@code changeScene} loads the scene in relation to the scene name entered into the parameter.
      * @apiNote  {@code "workspace"} is an abbreviation for /com/smartboard/view/Workspace.fxml <br>
      *           {@code "signup"} is an abbreviation for /com/smartboard/view/Signup.fxml <br>
      *           {@code "login"} is an abbreviation for /com/smartboard/view/Login.fxml <br>
-     * @return   {@code alert} if alert type exists and null if it doesn't <br>
      * */
-
     public static void changeScene(ActionEvent actionEvent, String pane) {
 
         try {
+
             if (pane.contains("workspace")) {
                 Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
                 Parent parent = FXMLLoader.load(Objects.requireNonNull(WorkspaceController.class.getResource("/com/smartboard/view/Workspace.fxml")));
@@ -66,4 +64,79 @@ public final class FactorySceneViewCreator {
             FactoryAlertViewCreator.getAlert("error:ioexc");
         }
     }
+
+
+    public static Stage showStage(ActionEvent actionEvent, String pane, DataTransferObject dataTransferObject) {
+
+        try {
+
+            if (pane.toLowerCase().contains("addtask")) {
+
+                URL fxmlLocation = FactorySceneViewCreator.class.getResource("/com/smartboard/view/AddTask.fxml");
+
+                FXMLLoader taskLoader = new FXMLLoader(fxmlLocation);
+
+                Stage stage = new Stage();
+
+                stage.setScene(new Scene(taskLoader.load()));
+
+                TaskCardController controller = taskLoader.getController();
+
+                controller.initData((Project) dataTransferObject);
+
+                stage.show();
+
+                return stage;
+            }
+
+            if (pane.toLowerCase().contains("edit")) {
+
+                URL fxmlLocation = FactorySceneViewCreator.class.getResource("/com/smartboard/view/Edit.fxml");
+
+                FXMLLoader loader = new FXMLLoader(fxmlLocation);
+
+                Stage stage = new Stage();
+
+                stage.setScene(new Scene(loader.load()));
+
+                EditController controller = loader.getController();
+
+                controller.initData((Profile) dataTransferObject);
+
+                stage.show();
+
+                return stage;
+            }
+        } catch (IOException ioException) {
+            FactoryAlertViewCreator.getAlert("error:ioexc");
+        }
+
+
+        return null;
+    }
+    public static void changeScene(ActionEvent actionEvent, String pane, DataTransferObject dataTransferObject) {
+
+        try {
+            if (pane.toLowerCase().contains("workspace")) {
+
+                URL fxmlLocation = FactorySceneViewCreator.class.getResource("/com/smartboard/view/Workspace.fxml");
+
+                FXMLLoader loader = new FXMLLoader(fxmlLocation);
+
+                Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+
+                stage.setScene(new Scene(loader.load()));
+
+                WorkspaceController controller = loader.getController();
+
+                controller.initData((Profile) dataTransferObject);
+
+                stage.show();
+            }
+        } catch (IOException ioException) {
+            FactoryAlertViewCreator.getAlert("error:ioexc");
+        }
+    }
+
+
 }

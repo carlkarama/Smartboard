@@ -3,6 +3,7 @@ package com.smartboard.controller;
 import com.smartboard.model.database.DatabaseHandlerSingleton;
 import com.smartboard.model.database.dao.ProfileDataAccessObject;
 import com.smartboard.model.user.Profile;
+import com.smartboard.view.FactoryAlertViewCreator;
 import com.smartboard.view.FactorySceneViewCreator;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -34,6 +35,8 @@ public class LoginController implements Initializable {
 
     @FXML private Hyperlink accountRegistrationLink; // when clicked take user to SignupController
 
+    Profile profile = new Profile();
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
@@ -46,36 +49,27 @@ public class LoginController implements Initializable {
         }
     }
 
-    public void userLogin(ActionEvent actionEvent) throws IOException {
+    public void userLogin(ActionEvent actionEvent) {
 
         if (actionEvent.getSource().equals(loginBtn)) {
 
             Connection connection = DatabaseHandlerSingleton.getDatabaseHandlerSingleton();
 
-            profile = new Profile(username.getText(), password.getText());
+            if(!(username.getText().isEmpty() || password.getText().isEmpty())) {
 
-            ProfileDataAccessObject profileDataAccessObject = new ProfileDataAccessObject(connection);
+                profile = new Profile(username.getText(), password.getText());
 
-            if (profileDataAccessObject.login(profile) == null) {
-                System.out.println("Login failed");
+                ProfileDataAccessObject profileDataAccessObject = new ProfileDataAccessObject(connection);
 
+                if (profileDataAccessObject.login(profile) == null) {
+                    System.out.println("Login failed");
+
+                } else {
+                    // load workspace
+                    FactorySceneViewCreator.changeScene(actionEvent, "workspace", profile);
+                }
             } else {
-                //change scene to workspace
-                //showCustomerDialog(profile);
-
-                URL fxmlLocation = getClass().getResource("/com/smartboard/view/Workspace.fxml");
-                FXMLLoader loader = new FXMLLoader(fxmlLocation);
-
-                Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-                stage.setScene(new Scene(loader.load()));
-
-                WorkspaceController controller = loader.getController();
-
-                controller.initData(profile);
-
-                stage.show();
-
-                //FactorySceneViewCreator.changeScene(actionEvent, "workspace");
+                FactoryAlertViewCreator.getAlert("error:etb");
             }
         }
     }

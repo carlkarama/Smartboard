@@ -53,6 +53,7 @@ public class SignupController implements Initializable {
     @FXML private TextField password;
 
     private String avatar;
+    private Profile basic;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -68,12 +69,12 @@ public class SignupController implements Initializable {
         ProfileDataAccessObject profileDataAccessObject = new ProfileDataAccessObject(connection);
 
         //Create a profile instance & inject the FXML values into the profile constructor
-        Profile basic = new Profile(new BasicUser(firstName.getText(), lastName.getText()), username.getText().toLowerCase(Locale.ROOT), password.getText(), getAvatar());
+        this.basic = new Profile(new BasicUser(firstName.getText(), lastName.getText()), username.getText().toLowerCase(Locale.ROOT), password.getText(), getAvatar());
 
         // Call the create method from the ProfileDataAccessObject to add the basic user to the database
 
         if (profileDataAccessObject.create(basic)) {
-            FactorySceneViewCreator.changeScene(actionEvent, "workspace");
+            FactorySceneViewCreator.changeScene(actionEvent, "workspace", basic);
         } else {
             FactoryAlertViewCreator.getAlert("error:fuc");
         }
@@ -95,10 +96,20 @@ public class SignupController implements Initializable {
 
         try (FileInputStream fileInputStream = new FileInputStream(file.getAbsolutePath())) {
 
+
             Image image = new Image(fileInputStream);
             imagePicker = new ImageView(image);
 
-            setAvatar(file.getName());
+            File destination = new File("src/com/smartboard/resource/image/logo/" + file.getName());
+
+            if (destination.createNewFile()) {
+
+                System.out.println(destination.getName());
+
+                setAvatar(destination.getName());
+            }
+
+
 
         } catch (IOException fileNotFoundException) {
             fileNotFoundException.printStackTrace();
